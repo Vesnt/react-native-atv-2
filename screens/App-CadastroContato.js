@@ -2,33 +2,46 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Input, Button, Header } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import axios from 'axios';
 
-const CadastroContatoScreen = ({navigation}) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefone, setTelefone] = useState('');
-  
 
-  const handleSignup = () => {
-    console.log('Nome:', name);
-    console.log('Telefone:', telefone);
-    console.log('Email:', email);
-    
-   
-  };
+const CadastroContatoScreen = ({ navigation }) => {
+  const [getNome, setNome] = useState('');
+  const [getEmail, setEmail] = useState('');
+  const [getTelefone, setTelefone] = useState('');
+  const [getCpf, setCpf] = useState('');
+
+
+  async function inserirDados() {
+
+    await axios.post('http://professornilson.com/testeservico/clientes'
+      , {
+
+        nome: getNome,
+        telefone: getTelefone,
+        cpf: getCpf,
+        email: getEmail,
+
+
+      }).then(function (response) {
+        console.log(response);
+      }).catch(function (error) {
+        console.log(error);
+
+      });
+
+  }
 
   return (
 
 
     <View>
-      
+
       <Header
         leftComponent={<Button
           icon={
             <Icon
-              name="arrow-left"
+              nome="arrow-left"
               size={20}
               color="white"
             />
@@ -36,43 +49,50 @@ const CadastroContatoScreen = ({navigation}) => {
           title=""
           onPress={() => navigation.navigate('Lista')}
         />}
-        
-        
+
+
         centerComponent={{ text: 'Cadastro de Contatos', style: { color: '#fff', fontSize: 25 } }}
       />
-<View style={styles.container}>
-      <Input
-        placeholder="Nome"
-        onChangeText={(text) => setName(text)}
-        value={name}
-        autoCapitalize="words"
-      />
-     
-       <Input
-        placeholder="Email"
-        onChangeText={(text) => setEmail(text)}
-        value={email}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
+      <View style={styles.container}>
+        <Input
+          placeholder="Nome"
+          onChangeText={(text) => setNome(text)}
+          value={getNome}
+          autoCapitalize="words"
+        />
 
-       <Input
-        placeholder="Telefone"
-        onChangeText={(text) => setTelefone(text)}
-        value={telefone}
-        keyboardType="decimal-pad"
-        autoCapitalize="none"
-      />
-      
-      <View style={styles.buttonContainer}>
-        <Button
-          title="SALVAR"
-          buttonStyle={styles.button}
-          onPress={()=>navigation.navigate('Lista')} />
-        
+        <Input
+          placeholder="Email"
+          onChangeText={(text) => setEmail(text)}
+          value={getEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
 
-        
-      </View>
+        <Input
+          placeholder="Telefone"
+          onChangeText={(text) => setTelefone(text)}
+          value={getTelefone}
+          keyboardType="decimal-pad"
+          autoCapitalize="none"
+        />
+        <Input
+          placeholder="Cpf"
+          onChangeText={(text) => setCpf(text)}
+          value={getCpf}
+          keyboardType="decimal-pad"
+          autoCapitalize="none"
+        />
+
+        <View style={styles.buttonContainer}>
+          <Button
+            title="SALVAR"
+            buttonStyle={styles.button}
+            onPress={inserirDados} />
+
+
+
+        </View>
       </View>
     </View>
   );

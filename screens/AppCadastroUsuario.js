@@ -1,28 +1,40 @@
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Input, Button, Text } from 'react-native-elements';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {  Header, Icon  } from 'react-native-elements';
+import { Input, Button } from 'react-native-elements';
+import { Header, Icon } from 'react-native-elements';
+import { initializeApp } from "firebase/app";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { firebaseConfig } from "./firebase.js";
+
 
 const CadastroUsuarioScreen = ({ navigation }) => {
-  const [name, setName] = useState('');
+
   const [email, setEmail] = useState('');
-  const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSignup = () => {
-    console.log('Nome:', name);
-    console.log('Email:', email);
-    console.log('Cpf:', cpf);
-    console.log('Senha:', password);
+
+  const app = initializeApp(firebaseConfig);
+
+
+  const handleSignup = async () => {
+    try {
+      const auth = getAuth(app);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password, {
+        displayName: name,
+        email: email,
+      });
+      console.log('Usuário criado com sucesso!', userCredential.user);
+      navigation.navigate('Lista');
+    } catch (error) {
+      console.log('Erro ao criar usuário:', error);
+    }
   };
 
   return (
 
 
- 
-<View>
+
+    <View>
       <Header
         leftComponent={<Button
           icon={
@@ -35,45 +47,34 @@ const CadastroUsuarioScreen = ({ navigation }) => {
           title=""
           onPress={() => navigation.navigate('Lista')}
         />}
-        
-        
+
+
         centerComponent={{ text: 'Cadastrar Usuário', style: { color: '#fff', fontSize: 25 } }}
       />
       <View style={styles.container}>
-  
-      <Input
-        placeholder="Nome"
-        onChangeText={(text) => setName(text)}
-        value={name}
-        autoCapitalize="words"
-      />
-      <Input
-        placeholder="Cpf"
-        onChangeText={(text) => setCpf(text)}
-        value={cpf}
-        keyboardType="decimal-pad"
-        autoCapitalize="none"
-      />
-      <Input
-        placeholder="Email"
-        onChangeText={(text) => setEmail(text)}
-        value={email}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <Input
-        placeholder="Senha"
-        onChangeText={(text) => setPassword(text)}
-        value={password}
-        secureTextEntry
-      />
-      <View style={styles.buttonContainer}>
-        <Button
-          title="SALVAR"
-          buttonStyle={styles.button}
-          onPress={() => navigation.navigate('Lista')} />
 
-      </View>
+
+        <Input
+          placeholder="Email"
+          onChangeText={(text) => setEmail(text)}
+          value={email}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <Input
+          placeholder="Senha"
+          onChangeText={(text) => setPassword(text)}
+          value={password}
+          secureTextEntry
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            title="SALVAR"
+            buttonStyle={styles.button}
+            onPress={handleSignup} />
+
+
+        </View>
       </View>
     </View>
   );

@@ -1,63 +1,105 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Button, Header, ListItem, Avatar, Icon } from 'react-native-elements';
 import { useIsFocused } from "@react-navigation/native";
+import axios from 'axios';
+import { ScrollView } from 'react-native-gesture-handler';
+import { firebaseConfig } from "./firebase.js";
+import { initializeApp } from "firebase/app";
+import { getAuth, signOut } from "firebase/auth";
+
+
+
 
 function ListaScreen({ navigation }) {
 
-  const lista = [
-    {   id: 1, nome: 'Marcos Andrade',
-        avatar_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4HdzG1pEhoNcrazR62fZv_2gNXtiqlAq42A&usqp=CAU',
-        telefone: '81 988553424', email: 'teste@teste.com.br'
-    },
-    {
-        id: 2, nome: 'Patrícia Tavares',
-        avatar_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4JbwG0c_1MD5Wv_dDXcEXFPDzJAMA2SMqtA&usqp=CAU',
-        telefone: '81 998765332', email: 'teste@teste.com.br'
-    },
-    {
-        id: 3, nome: 'Rodrigo Antunes',
-        avatar_url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4HdzG1pEhoNcrazR62fZv_2gNXtiqlAq42A&usqp=CAU',
-        telefone: '81 987765525', email: 'teste@teste.com.br'
-    },]
+  const [list, setList] = useState([]);
+  const isFocused = useIsFocused();
+
+  const app = initializeApp(firebaseConfig);
+
+  const auth = getAuth(app);
+
+  useEffect(() => {
+
+    async function consultarDados() {
+
+      await axios.get('http://professornilson.com/testeservico/clientes')
+        .then(function (response) {
+          setList(response.data);
+          console.log(response.data);
+        }).catch(function (error) {
+          console.log(error);
+
+        });
+
+    }
+    consultarDados();
+  }, [isFocused])
+
+
+  const handleLogout = async () => {
+    if (auth.currentUser) {
+      try {
+        await signOut(auth);
+        console.log("Logout bem sucedido!");
+
+        alert('Logout bem sucedido!');
+        
+        navigation.navigate('Home');
+
+
+        // Logout bem sucedido
+      } catch (error) {
+        console.log("Ocorreu um erro ao fazer logout: " + error.message);
+        // Ocorreu um erro ao fazer logout
+        console.log(error.message);
+      }
+    } else {
+      console.log("Não há usuário logado.");
+    }
+  };
+
+
 
   return (
     <View >
-      <Header
-        leftComponent={<Button
-          icon={
-            <Icon
-              name="arrow-left"
-              size={25}
-              color="white"
-            />
-          }
-          title=""
-          onPress={() => navigation.navigate('Home')}
-        />}
-        rightComponent={<Button
-          title="+"
-          onPress={() => navigation.navigate('CadastroContato')}
-        />}
-        centerComponent={{ text: 'Lista de Contatos', style: { color: '#fff', fontSize: 25 } }}
-      />
-      {
-        lista.map((l, i) => (
-          <ListItem key={i} bottomDivider onPress={() => navigation.navigate('ALTERARCONTATO',
-            {
-              nome: l.nome,
-              telefone: l.telefone,
-              email: l.email,
-              id: l.id
-            })}>
-            <Avatar source={{ uri: l.avatar_url }} />
-            <ListItem.Content>
-              <ListItem.Title>{l.nome}</ListItem.Title>
-              <ListItem.Subtitle>{l.telefone}</ListItem.Subtitle>
-            </ListItem.Content>
-          </ListItem>
-        ))
-      }
+      <ScrollView>
+        <Header
+          leftComponent={<Button
+            icon={
+              <Icon
+                name="arrow-left"
+                size={25}
+                color="white"
+              />
+            }
+            title=""
+            onPress={handleLogout}
+          />}
+          rightComponent={<Button
+            title="+"
+            onPress={() => navigation.navigate('CadastroContato')}
+          />}
+          centerComponent={{ text: 'Lista de Contatos', style: { color: '#fff', fontSize: 25 } }}
+        />
+        {
+          list.map((l, i) => (
+            <ListItem key={i} bottomDivider onPress={() => navigation.navigate('ALTERARCONTATO',
+              {
+                nome: l.nome,
+                email: l.email,
+                id: l.id
+              })}>
+              <Avatar source={{ uri: 'https://www.shutterstock.com/image-illustration/generic-human-man-face-front-600w-519713383.jpg' }} />
+              <ListItem.Content>
+                <ListItem.Title>{l.nome}</ListItem.Title>
+                <ListItem.Subtitle>{l.email}</ListItem.Subtitle>
+              </ListItem.Content>
+            </ListItem>
+          ))
+        }
+      </ScrollView>
     </View>
   );
 }

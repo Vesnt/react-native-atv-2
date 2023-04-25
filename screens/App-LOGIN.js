@@ -1,11 +1,42 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Input, Button, Avatar } from 'react-native-elements';
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { firebaseConfig } from "./firebase.js";
 
 
-const LoginScreen = ({navigation}) => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+
+  const app = initializeApp(firebaseConfig);
+
+  const auth = getAuth(app);
+
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      // login bem sucedido
+      const user = userCredential.user;
+      console.log('Usuário logado:', user.uid);
+
+      alert('Usuário logado:', user.uid)
+
+      navigation.navigate('Lista')
+
+
+    } catch (error) {
+      // erro ao fazer login
+      console.log('Erro ao fazer login: Não existe usuário cadastrado no firebase', error.code, error.message);
+    }
+
+
+  };
+
+
+
 
   return (
     <View style={styles.container}>
@@ -32,13 +63,14 @@ const LoginScreen = ({navigation}) => {
         <Button
           title="LOGIN"
           buttonStyle={styles.button}
-          onPress={() => navigation.navigate('Lista')}
+          onPress={handleLogin}
         />
         <Button
           title="CADASTRA-SE"
           buttonStyle={styles.button}
-           onPress={() => navigation.navigate('CadastroUsuario')}
+          onPress={() => navigation.navigate('CadastroUsuario')}
         />
+
       </View>
     </View>
   );
